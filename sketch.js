@@ -30,12 +30,23 @@ function onScanSuccess(decodedText) {
 }
 
 function checkEntry(code) {
-    const dbRef = firebase.database().ref('users/' + code); // Update with your database path
+    const dbRef = firebase.database().ref('users/' + code); // Reference to the user key
 
     dbRef.once('value')
         .then(snapshot => {
             if (snapshot.exists()) {
-                document.getElementById('result').innerText = 'Person found: ' + JSON.stringify(snapshot.val());
+                const isActive = snapshot.val(); // Get the current value (true/false)
+                document.getElementById('result').innerText = `Person found. Active: ${isActive}`;
+
+                // Update the value of the key to false
+                dbRef.set(false) // Sets the value of the user key to false
+                    .then(() => {
+                        console.log("Updated successfully: set value to false");
+                        document.getElementById('result').innerText += '\nStatus updated to false';
+                    })
+                    .catch(error => {
+                        console.error("Error updating value:", error);
+                    });
             } else {
                 document.getElementById('result').innerText = 'Person not found';
             }
